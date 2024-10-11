@@ -54,4 +54,12 @@ setup_github_ssh() {
 install_docker
 setup_github_ssh
 
-echo "Setup complete. Remember to log out and back in for Docker group changes to take effect."
+echo "Remember to log out and back in for Docker group changes to take effect."
+echo ""
+echo "Please copy from lastpass the bash_secrets and add it to a ./bash/.bash_secrets file "
+# echo "Please ensure you're logged into LastPass CLI before continuing."
+# read -p "Press Enter to retrieve .bash_secrets from LastPass..."
+# lpass show -c --notes "Dotfiles/.bash_secrets"
+# echo "Content copied to clipboard. Please paste it into ~/.bash_secrets"
+read -p "Press Enter when you've created ./bash/.bash_secrets..."
+echo "setup complete!  please run pdp.sh and copy the pdp snippet to this host's bashrc"
