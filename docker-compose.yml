@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  devenv:
+    build: .
+    volumes:
+      - ${HOME}/projects/portable-dev-workstation/bash/.bashrc:/root/.bashrc
+      - ${HOME}/projects/portable-dev-workstation/tmux/.tmux.conf:/root/.tmux.conf
+      - ${HOME}/projects/portable-dev-workstation/neovim:/root/.config/nvim
+      - ${PWD}:/workspace
+    working_dir: /workspace
+    tty: true
+    stdin_open: true
+    command: /bin/bash
