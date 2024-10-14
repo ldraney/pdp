@@ -1,0 +1,10 @@
+version: '3'
+services:
+  clipboard:
+    build: .
+    volumes:
+      - ./clipboard_scripts:/scripts
+    environment:
+      - HOST_OS=${HOST_OS:-linux}
+    ports:
+      - "5555:5555"

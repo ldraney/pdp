@@ -2,6 +2,31 @@
 
 PDP is a Docker-based development environment that provides a consistent, maintainable, iterative setup across different machines and servers.
 
+## Clipboard functionality
+This setup achieves the following:
+
+1. Clipper runs in its own container, separate from your main development environment.
+2. The two containers can communicate via the Docker network.
+3. Clipper is exposed to the host on port 8377, allowing it to interact with the host's clipboard.
+4. No Clipper installation or script is required on the host system.
+
+To use this setup:
+
+1. In your tmux session inside the main container, when you copy text, it will be sent to the Clipper service.
+2. On your host machine, you need to run a clipboard manager that listens on port 8377. For example, on macOS, you could use:
+
+   ```
+   nc localhost 8377 | pbcopy
+   ```
+
+   For Linux with X11, you might use:
+
+   ```
+   nc localhost 8377 | xclip -selection clipboard
+   ```
+
+This command should be run on your host system, not inside Docker. It will listen for data from Clipper and put it into your system clipboard.
+
 ## Setup Instructions
 
 1. Clone this repository:

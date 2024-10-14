@@ -12,6 +12,12 @@ docker build -t ssh-setup -f Dockerfile.ssh .
 # Build the main Docker image
 docker build -t pdp .
 
+# Create a Docker network for the containers to communicate
+docker network create pdp-network
+
+# Run the Clipper container
+docker run -d --name clipper-service --network pdp-network -p 8377:8377 clipper
+
 # Display the SSH public key
 echo "Your SSH public key is:"
 # docker run --rm ssh-setup cat /root/.ssh/id_rsa.pub.txt
@@ -31,3 +37,6 @@ docker run -it --rm \
   -v "${CURRENT_DIR}:/root/workspace" \
   -w "/root/workspace" \
   pdp /bin/bash
+
+# Clean up the Clipper container and network when done
+# trap 'docker stop clipper-service; docker rm clipper-service; docker network rm pdp-network' EXIT
