@@ -6,11 +6,20 @@ CURRENT_DIR="${1:-$(pwd)}"
 # Build the Clipper Docker image
 docker build -t clipper -f Dockerfile.clipper .
 
+# Build the SSH setup image
+docker build -t ssh-setup -f Dockerfile.ssh .
+
 # Build the main Docker image
 docker build -t pdp .
 
-# Ensure SSH agent is running on the host
-eval $(ssh-agent -s)
+# Display the SSH public key
+echo "Your SSH public key is:"
+# docker run --rm ssh-setup cat /root/.ssh/id_rsa.pub.txt
+docker run --rm ssh-setup cat /root/.ssh/id_rsa.pub
+
+echo "Please add this key to your GitHub account before proceeding."
+echo "Press any key to continue..."
+read -n 1 -s
 
 # Run the Docker container
 docker run -it --rm \
@@ -19,20 +28,6 @@ docker run -it --rm \
   -v "${HOME}/projects/pdp/bash/.bash_secrets:/root/.bash_secrets" \
   -v "${HOME}/projects/pdp/tmux/.tmux.conf:/root/.tmux.conf" \
   -v "${HOME}/projects/pdp/neovim:/root/.config/nvim" \
-  -v "${HOME}/.ssh:/root/.ssh" \
-  -v "${SSH_AUTH_SOCK}:/ssh-agent" \
-  -e SSH_AUTH_SOCK=/ssh-agent \
   -v "${CURRENT_DIR}:/root/workspace" \
   -w "/root/workspace" \
-  pdp /bin/bash -c "
-    # Fix SSH directory permissions
-    chmod 700 /root/.ssh
-    chmod 600 /root/.ssh/*
-    
-    # Start SSH agent and add key
-    eval \$(ssh-agent -s)
-    ssh-add /root/.ssh/id_ed25519
-    
-    # Start bash
-    exec /bin/bash
-  "
+  pdp /bin/bash
