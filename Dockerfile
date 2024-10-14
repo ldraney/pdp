@@ -3,10 +3,6 @@ FROM clipper as clipper
 
 FROM ubuntu:latest
 
-# Copy Clipper and its start script from the clipper stage
-COPY --from=clipper /usr/local/bin/clipper /usr/local/bin/clipper
-COPY --from=clipper /usr/local/bin/start-clipper.sh /usr/local/bin/start-clipper.sh
-
 # Install dependencies for Neovim, Neovim, and Tmux and git
 RUN apt-get update && apt-get install -y \
     software-properties-common \
@@ -31,6 +27,12 @@ RUN apt-get update && apt-get install -y \
     xsel \
     && rm -rf /var/lib/apt/lists/*
 
+# Copy Clipper, its start script, and config from the clipper stage
+COPY --from=clipper /usr/local/bin/clipper /usr/local/bin/clipper
+COPY --from=clipper /usr/local/bin/start-clipper.sh /usr/local/bin/start-clipper.sh
+COPY --from=clipper /root/.config/clipper/clipper.json /root/.config/clipper/clipper.json
+
+
 # Create necessary directories
 RUN mkdir -p /root/.config/nvim /root/workspace /root/.ssh
 
@@ -39,4 +41,6 @@ RUN echo "StrictHostKeyChecking no" >> /root/.ssh/config
 
 WORKDIR /root/workspace
 
+# Use the start script as the entrypoint
+ENTRYPOINT ["/usr/local/bin/start-clipper.sh"]
 CMD ["/bin/bash"]
