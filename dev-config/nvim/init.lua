@@ -117,33 +117,55 @@ vim.opt.showmode = false
 -- vim.schedule(function()
 --   vim.opt.clipboard = 'unnamedplus'
 -- end)
--- vim.opt.clipboard = 'unnamedplus'
 --
-local function copy(lines, _)
-	local joined_lines = table.concat(lines, "\n")
-	vim.fn.system("echo -n " .. vim.fn.shellescape(joined_lines) .. " | nc clipboard 12345")
+-- Function to get clipboard content from server
+local function get_server_clipboard()
+	local handle = io.popen("nc clipboard 12345 get 2>/dev/null", "r")
+	if handle then
+		local result = handle:read("*a")
+		handle:close()
+		return result
+	end
+	return ""
 end
 
-local function paste()
-	return vim.fn.split(vim.fn.system("nc clipboard 12345"), "\n")
+-- Function to set clipboard content on server
+local function set_server_clipboard(text)
+	local handle = io.popen("nc clipboard 12345", "w")
+	if handle then
+		handle:write(text)
+		handle:close()
+	end
 end
 
-vim.g.clipboard = {
-	name = "customClipboard",
-	copy = {
-		["+"] = copy,
-		["*"] = copy,
-	},
-	paste = {
-		["+"] = paste,
-		["*"] = paste,
-	},
-	cache_enabled = 0,
-}
+-- Set up key mappings for server clipboard operations
+vim.api.nvim_set_keymap("n", "<leader>y", '"+y', { noremap = true, silent = true })
+vim.api.nvim_set_keymap("v", "<leader>y", '"+y', { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<leader>p", '"+p', { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<leader>P", '"+P', { noremap = true, silent = true })
 
--- Optional: If you want to use the clipboard for the unnamed register as well
--- vim.opt.clipboard = 'unnamedplus'
---
+-- Override the + register operations
+vim.api.nvim_create_autocmd("TextYankPost", {
+	callback = function()
+		if vim.v.event.operator == "y" and vim.v.event.regname == "+" then
+			set_server_clipboard(vim.fn.getreg("+"))
+		end
+	end,
+})
+
+vim.keymap.set({ "n", "v" }, '"+p', function()
+	vim.fn.setreg("+", get_server_clipboard())
+	return '"+p'
+end, { expr = true, silent = true })
+
+vim.keymap.set({ "n", "v" }, '"+P', function()
+	vim.fn.setreg("+", get_server_clipboard())
+	return '"+P'
+end, { expr = true, silent = true })
+
+-- Keep the default clipboard behavior
+vim.opt.clipboard = "unnamed"
+
 -- Enable break indent
 vim.opt.breakindent = true
 
