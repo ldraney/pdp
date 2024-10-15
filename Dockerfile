@@ -1,6 +1,3 @@
-# Start with the Clipper stage
-FROM clipper as clipper
-
 # SSH setup stage
 FROM ssh-setup as ssh-setup
 
@@ -20,31 +17,28 @@ RUN apt-get update && apt-get install -y \
     tmux \
     git \
     openssh-client \
+    wget \
+    xsel \
+    netcat-openbsd \
+    ncurses-term \
     && add-apt-repository ppa:neovim-ppa/unstable -y \
     && apt-get update \
     && apt-get install -y neovim \
     && rm -rf /var/lib/apt/lists/*
 
-# trying to get tmux clipboard to work within container
-RUN apt-get update && apt-get install -y \
-    wget \
-    xsel \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy Clipper, its start script, and config from the clipper stage
-COPY --from=clipper /usr/local/bin/clipper /usr/local/bin/clipper
-COPY --from=clipper /usr/local/bin/start-clipper.sh /usr/local/bin/start-clipper.sh
-COPY --from=clipper /root/.config/clipper/clipper.json /root/.config/clipper/clipper.json
-
 # Copy SSH setup from the ssh-setup stage
 COPY --from=ssh-setup /root/.ssh /root/.ssh
 # COPY --from=ssh-setup /root/.ssh/id_rsa.pub /root/.ssh/id_rsa.pub
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TERM=xterm-256color
 
 # Create necessary directories
 RUN mkdir -p /root/.config/nvim /root/workspace
 
 WORKDIR /root/workspace
 
-# Use the start script as the entrypoint
-ENTRYPOINT ["/usr/local/bin/start-clipper.sh"]
-CMD ["/bin/bash"]
+# CMD ["/bin/bash"]
+# Change the CMD to keep the container running
+CMD ["tail", "-f", "/dev/null"]
+

@@ -1,0 +1,47 @@
+services:
+  pdp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ${HOME}/projects/pdp/bash/.bashrc:/root/.bashrc
+      - ${HOME}/projects/pdp/bash/.bash_secrets:/root/.bash_secrets
+      - ${CURRENT_DIR:-$PWD}:/root/workspace
+      - ./dev-config:/root/.config
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    working_dir: /root/workspace
+    networks:
+      - pdp-network
+    environment:
+      - DISPLAY=${DISPLAY}
+    tty: true
+    stdin_open: true
+
+  ssh-setup:
+    build:
+      context: .
+      dockerfile: Dockerfile.ssh
+    volumes:
+      - ssh-keys:/root/.ssh
+    command: cat /root/.ssh/id_rsa.pub
+
+  clipboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.clipboard
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ${HOME}/.Xauthority:/root/.Xauthority:ro
+    environment:
+      - DISPLAY=${DISPLAY}
+      - XAUTHORITY=/root/.Xauthority
+    networks:
+      - pdp-network
+
+networks:
+  pdp-network:
+    driver: bridge
+
+volumes:
+  ssh-keys:
+
