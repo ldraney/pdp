@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     volumes:
-      - ./dev-config:/root
+      - ./dev-config:/root/.config
     environment:
       - DISPLAY=${DISPLAY}
     networks:
