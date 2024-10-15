@@ -7,6 +7,7 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./dev-config:/root/.config
+      - /tmp/.X11-unix:/tmp/.X11-unix
     environment:
       - DISPLAY=${DISPLAY}
     networks:
@@ -20,10 +21,14 @@ services:
       dockerfile: Dockerfile.clipboard
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
+      - $HOME/.Xauthority:/root/.Xauthority:ro
     environment:
       - DISPLAY=${DISPLAY}
-    network_mode: host
+      - XAUTHORITY=/root/.Xauthority
+    networks:
+      - clipboard-network
 
 networks:
   clipboard-network:
     driver: bridge
+
