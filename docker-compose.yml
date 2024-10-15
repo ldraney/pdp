@@ -4,7 +4,7 @@ services:
   dev:
     build: 
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     volumes:
       - ./dev-config:/root/.config
       - /tmp/.X11-unix:/tmp/.X11-unix
