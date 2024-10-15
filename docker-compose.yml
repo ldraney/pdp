@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  dev:
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./dev-config:/root
+    environment:
+      - DISPLAY=${DISPLAY}
+    networks:
+      - clipboard-network
+    tty: true
+    stdin_open: true
+
+  clipboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.clipboard
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    environment:
+      - DISPLAY=${DISPLAY}
+    network_mode: host
+
+networks:
+  clipboard-network:
+    driver: bridge
