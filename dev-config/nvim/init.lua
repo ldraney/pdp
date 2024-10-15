@@ -119,18 +119,31 @@ vim.opt.showmode = false
 -- end)
 -- vim.opt.clipboard = 'unnamedplus'
 --
+local function copy(lines, _)
+	local joined_lines = table.concat(lines, "\n")
+	vim.fn.system("echo -n " .. vim.fn.shellescape(joined_lines) .. " | nc clipboard 12345")
+end
+
+local function paste()
+	return vim.fn.split(vim.fn.system("nc clipboard 12345"), "\n")
+end
+
 vim.g.clipboard = {
-	name = "dockerClipboard",
+	name = "customClipboard",
 	copy = {
-		["+"] = "python $HOME/projects/docker-based-clipboard-system/clipboard_client.py set",
-		["*"] = "python $HOME/projects/docker-based-clipboard-system/clipboard_client.py set",
+		["+"] = copy,
+		["*"] = copy,
 	},
 	paste = {
-		["+"] = "python $HOME/projects/docker-based-clipboard-system/clipboard_client.py get",
-		["*"] = "python $HOME/projects/docker-based-clipboard-system/clipboard_client.py get",
+		["+"] = paste,
+		["*"] = paste,
 	},
+	cache_enabled = 0,
 }
 
+-- Optional: If you want to use the clipboard for the unnamed register as well
+-- vim.opt.clipboard = 'unnamedplus'
+--
 -- Enable break indent
 vim.opt.breakindent = true
 
